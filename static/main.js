@@ -75,15 +75,23 @@ function main(){
                 password: 'petyaspass',
     });
 
+    // Сумма, зачисленная авторизованному пользователю на счет в выбранной валюте
+    const wallet = { currency: 'EUR', amount: 500000 };
 
+    // Сумма перевода Неткоинов от авторизованного пользователя второму пользователю
+    const amount = 36000;
+    
+    
 
     // Получение курса текущей валюты к Неткоину
     getStocks((err, data) => {
         if (err) {
                 console.error('Error during getting stocks info');                               
-        } else {                
-                const stocksInfo = data[0]; 
+        } else { 
+                const stocksInfo = data[99];
 
+    // Вычисление конвертированной суммы
+    const targetAmount = stocksInfo['EUR_NETCOIN'] * wallet.amount;
     
         // Создаем пользователя Иван    
         Ivan.createUser((err, data) => {
@@ -92,8 +100,7 @@ function main(){
             } else {
                 console.log(`Ivan is created!`);                
             }        
-        });
-
+        }); 
 
             // Авторизуем пользователя Иван
             Ivan.performLogin((err, data) => {
@@ -104,36 +111,35 @@ function main(){
 
           
                     // Добавляем денег в кошелек авторизованному пользователю Иван
-                    Ivan.addMoney({ currency: 'EUR', amount: 500000 }, (err, data) => {
+                    Ivan.addMoney(wallet, (err, data) => {
                         if (err) {
                                 console.error('Error during adding money to Ivan');                
                         } else {
-                                console.log(`Added 500000 euros to Ivan`);
-                                const targetAmount = stocksInfo['EUR_NETCOIN'] * 500000;                            
-     
+                                console.log(`Added ${wallet.amount} euros to Ivan`);
 
+                                 
                             // Конвертация денег из текущей валюты в Неткоины
-                            Ivan.convertMoney({ fromCurrency: 'EUR', targetCurrency: 'Netcoins', targetAmount: targetAmount }, (err, data) => {
-                                if (err) {
-                                        console.error('Error during converting money');
-                                } else {
-                                        console.log(`Converted to coins ${targetAmount}`);
-    
+                            Ivan.convertMoney({ fromCurrency: wallet.currency, targetCurrency: 'NETCOIN', targetAmount: targetAmount }, (err, data) => {
+                                if (err) {                                        
+                                        console.error('Error during converting money');                                        
+                                } else {                                        
+                                        console.log(`${wallet.amount} ${wallet.currency} converted to ${targetAmount} NETCOINS`);
+                                                                            
 
                                     // Создаем пользователя Петя
-                                    Petya.createUser((err, data) => {
+                                    Petya.createUser( (err, data) => {
                                         if (err) {
-                                                console.error('Error during creating user Petya');
+                                                console.error(`Error during creating user Petya`);
                                         } else {
-                                                console.log(`Petya is created!`);
+                                                console.log(`Petya is created!`);                                                
     
 
                                             // Перевод денег от Ивана к Пете
-                                            Ivan.transferMoney({ to: Petya.username, amount: 36000 }, (err, data) => {
+                                            Ivan.transferMoney({ to: Petya.username, amount: amount }, (err, data) => {
                                                 if (err) {
-                                                        console.error('Error during transfering money to Petya');
-                                                } else {
-                                                        console.log(`Petya has got ${amount} NETCOINS`);
+                                                    console.error(`Error during transfering money to Petya`);
+                                                } else {                                                    
+                                                    console.log(`Petya has got ${amount} NETCOINS`);               
                                                 }
                                             });
                                         } 
